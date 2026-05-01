@@ -1,0 +1,32 @@
+.postCard {
+  border: 1px solid #ddd;
+  padding: 20px;
+  text-align: left;
+  background-color: #FAF7F3;
+  border-radius: 10px;
+}
+
+.postCard h3 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.postCard p {
+  font-size: 0.8em;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.postCard a {
+  display: block;
+  text-align: right;
+  font-size: 1em;
+  margin-top: 10px;
+  color: #5b84c9;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.postCard a:hover {
+  color: #7fa6e0;
+}

@@ -1,0 +1,103 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto Condensed", sans-serif;
+  background-color: #F3EDE3;
+  color: #383838;
+  font-size: 1.5em;
+}
+
+/* Center layout wrapper */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Header */
+header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+/* Navigation */
+nav {
+  display: flex;
+  gap: 20px;                    /* Good spacing for nav items */
+  align-items: center;
+}
+
+/* Links */
+a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #383838;
+}
+
+nav a {
+  text-transform: uppercase;
+}
+
+/* Buttons - Improved */
+button {
+  background-color: #419FD9;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.7em;
+  transition: opacity 0.2s ease;
+  border-radius: 6px;
+}
+
+/* Hover: 15% transparency */
+button:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+/* Disabled buttons */
+button:disabled {
+  background-color: #8fbfdd;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Standard distance between adjacent buttons */
+button + button,
+button + a,
+a + button {
+  margin-left: 12px;
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+  width: 400px;
+}
+
+form button {
+  width: 100%;
+  height: 42px;
+  margin-left: 0;
+}
+
+/* Inputs */
+input {
+  height: 42px;
+  padding: 0 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}

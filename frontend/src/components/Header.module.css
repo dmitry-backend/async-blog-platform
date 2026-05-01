@@ -1,0 +1,39 @@
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+  background-color: #FAF7F3;
+  
+  /* Added border as requested */
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.nav {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+/* Rest of the links (HOME, NEW POST, LOGIN, REGISTER) */
+.nav a {
+  color: #4d4d4d;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav a:hover {
+  color: #666666;
+}
+
+/* Only user email */
+.user {
+  font-weight: bold;
+  color: #5b84c9;
+  transition: color 0.2s ease;
+}
+
+.user:hover {
+  color: #7fa6e0;
+}
