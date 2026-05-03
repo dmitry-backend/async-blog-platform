@@ -1,4 +1,4 @@
-const BASE_URL = '';   // Empty because we use proxy
+const BASE_URL = 'https://async-blog-platform.onrender.com';
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
@@ -11,7 +11,7 @@ export const apiRequest = async (endpoint, options = {}) => {
     ...options,
   };
 
-  const response = await fetch(endpoint, config);   // No BASE_URL needed
+  const response = await fetch(`${BASE_URL}${endpoint}`, config);
   
   let data;
   try {
