@@ -1,4 +1,4 @@
-const BASE_URL = 'https://async-blog-platform.onrender.com';
+const BASE_URL = 'https://async-blog.onrender.com';
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
