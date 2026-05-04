@@ -16,8 +16,9 @@ class Settings(BaseSettings):
     CACHE_KEY_PREFIX: str = "app"
 
     # --- DATABASE ---
-    DATABASE_URL: str | None = None   # Single connection string from Render
+    DATABASE_URL: str | None = None   # Full connection string from Render
 
+    # Fallback fields for local development
     DB_USER: str = None
     DB_PASSWORD: str = None
     DB_HOST: str = "localhost"
@@ -57,8 +58,8 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> URL:
         if self.DATABASE_URL:
-            # Use full connection string from Render
-            return URL(self.DATABASE_URL)
+            # Correct way to parse full connection string
+            return URL.create(database_url=self.DATABASE_URL)
         
         # Fallback for local development
         return URL.create(
