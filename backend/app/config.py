@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     CACHE_KEY_PREFIX: str = "app"
 
     # --- DATABASE ---
-    DATABASE_URL: str | None = None   # Supabase Transaction Pooler URL
+    DATABASE_URL: str | None = None
 
     # Local fallback
     DB_USER: str | None = None
@@ -48,7 +48,6 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
 
-    # --- Modern Pydantic v2 Config ---
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -56,33 +55,15 @@ class Settings(BaseSettings):
         env_ignore_empty=True,
     )
 
-    # --- PROPERTIES ---
     @property
     def database_url(self) -> URL:
-        """
-        Optimized for Supabase Transaction Pooler + asyncpg.
-        """
         if self.DATABASE_URL:
             url = make_url(self.DATABASE_URL)
-
-            # Force asyncpg driver
             if url.drivername in ("postgresql", "postgres"):
                 url = url.set(drivername="postgresql+asyncpg")
-
-            # Remove sslmode from URL (asyncpg doesn't like it)
-            query_params = dict(url.query)
-            query_params.pop("sslmode", None)   # remove if present
-            url = url.set(query=query_params)
-
             return url
 
         # Local fallback
-        if not self.DB_USER or not self.DB_PASSWORD:
-            raise ValueError(
-                "DB_USER and DB_PASSWORD are required for local development. "
-                "Add them to your .env file."
-            )
-
         return URL.create(
             drivername="postgresql+asyncpg",
             username=self.DB_USER,
@@ -92,6 +73,13 @@ class Settings(BaseSettings):
             database=self.DB_NAME,
         )
 
+    @property
+    def database_url_sync(self) -> str:
+        """For Alembic migrations"""
+        if self.DATABASE_URL:
+            return str(self.database_url).replace("+asyncpg", "+psycopg2")
+        
+        return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-# Global instance
+
 settings = Settings()  # type: ignore[call-arg]
