@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     LOG_FILE: str = "app.log"
 
     # --- CACHE ---
-    CACHE_KEY_PREFIX: str = "app"          # ← Added this
+    CACHE_KEY_PREFIX: str = "app"
 
     # --- DATABASE ---
     DB_USER: str
@@ -38,6 +38,7 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+        "https://async-blog-platform.onrender.com",
     ]
 
     # --- CELERY ---
