@@ -16,8 +16,10 @@ class Settings(BaseSettings):
     CACHE_KEY_PREFIX: str = "app"
 
     # --- DATABASE ---
-    DB_USER: str
-    DB_PASSWORD: str
+    DATABASE_URL: str = None   # New: single connection string from Render
+
+    DB_USER: str = None
+    DB_PASSWORD: str = None
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_NAME: str = "async_blog"
@@ -51,10 +53,16 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
         extra = "ignore"
 
-
     # --- PROPERTIES ---
     @property
     def database_url(self) -> URL:
+        if self.DATABASE_URL:
+            # Use single connection string from Render
+            return URL.create(
+                drivername="postgresql+asyncpg",
+                database_url=self.DATABASE_URL
+            )
+        # Fallback to separate fields (local development)
         return URL.create(
             drivername="postgresql+asyncpg",
             username=self.DB_USER,
