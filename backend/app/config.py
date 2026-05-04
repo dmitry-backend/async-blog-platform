@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # --- DATABASE ---
     DATABASE_URL: str | None = None   # Full connection string from Render
 
-    # Fallback fields for local development
+    # Local fallback fields
     DB_USER: str = None
     DB_PASSWORD: str = None
     DB_HOST: str = "localhost"
@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     def database_url(self) -> URL:
         if self.DATABASE_URL:
             # Correct way to parse full connection string
-            return URL.create(database_url=self.DATABASE_URL)
+            return URL(self.DATABASE_URL)
         
         # Fallback for local development
         return URL.create(
