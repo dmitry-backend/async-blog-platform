@@ -1,3 +1,4 @@
+import ssl
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import NullPool
@@ -9,20 +10,22 @@ class Base(DeclarativeBase):
     pass
 
 
+# SSL context that accepts Supabase's certificate (self-signed in pooler)
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+
+
 # --- Engine (Optimized for Supabase Transaction Pooler) ---
 engine = create_async_engine(
     settings.database_url,
     echo=settings.ENVIRONMENT == "development",
     
-    # IMPORTANT for Supabase:
-    poolclass=NullPool,                    # Let Supabase handle connection pooling
-    pool_pre_ping=False,                   # Not needed with NullPool
-    
-    # These are critical for Supavisor (Supabase's pooler)
+    poolclass=NullPool,                    # Critical for Supabase pooler
     connect_args={
         "statement_cache_size": 0,
         "prepared_statement_cache_size": 0,
-        "ssl": True,                       # This replaces ?sslmode=require
+        "ssl": ssl_context,                # This fixes the certificate error
     },
 )
 
@@ -32,7 +35,6 @@ AsyncSessionMaker = async_sessionmaker(
     bind=engine,
     expire_on_commit=False,
     autoflush=False,
-    # class_=AsyncSession,   # already default
 )
 
 
