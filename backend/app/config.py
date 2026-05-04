@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     CACHE_KEY_PREFIX: str = "app"
 
     # --- DATABASE ---
-    DATABASE_URL: str | None = None   # ← Supabase Transaction Pooler URL here
+    DATABASE_URL: str | None = None   # Supabase Transaction Pooler URL
 
     # Local fallback
     DB_USER: str | None = None
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     DB_NAME_TEST: str = "async_blog_test"
 
     # --- SECURITY ---
-    JWT_SECRET_KEY: str                    # Required
+    JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -60,9 +60,7 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> URL:
         """
-        Returns a SQLAlchemy URL object optimized for Supabase + Render.
-        - On Render: uses Supabase Transaction Pooler (port 6543)
-        - Locally: builds from individual DB_ variables
+        Optimized for Supabase Transaction Pooler + asyncpg.
         """
         if self.DATABASE_URL:
             url = make_url(self.DATABASE_URL)
@@ -71,9 +69,9 @@ class Settings(BaseSettings):
             if url.drivername in ("postgresql", "postgres"):
                 url = url.set(drivername="postgresql+asyncpg")
 
-            # Supabase requires SSL — safer way (compatible with all versions)
+            # Remove sslmode from URL (asyncpg doesn't like it)
             query_params = dict(url.query)
-            query_params["sslmode"] = "require"
+            query_params.pop("sslmode", None)   # remove if present
             url = url.set(query=query_params)
 
             return url
@@ -94,26 +92,6 @@ class Settings(BaseSettings):
             database=self.DB_NAME,
         )
 
-    @property
-    def database_url_test(self) -> URL:
-        """For pytest"""
-        return URL.create(
-            drivername="postgresql+asyncpg",
-            username=self.DB_USER,
-            password=self.DB_PASSWORD,
-            host=self.DB_HOST,
-            port=self.DB_PORT,
-            database=self.DB_NAME_TEST,
-        )
 
-    @property
-    def database_url_sync(self) -> str:
-        """Sync version if needed"""
-        return (
-            f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@"
-            f"{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        )
-
-
-# Instantiate with type ignore to silence Pylance
+# Global instance
 settings = Settings()  # type: ignore[call-arg]
