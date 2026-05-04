@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # --- DATABASE ---
     DATABASE_URL: str | None = None   # Full connection string from Render
 
-    # Local fallback fields
+    # Local fallback
     DB_USER: str = None
     DB_PASSWORD: str = None
     DB_HOST: str = "localhost"
@@ -58,10 +58,9 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> URL:
         if self.DATABASE_URL:
-            # Correct way to parse full connection string
-            return URL(self.DATABASE_URL)
-        
-        # Fallback for local development
+            return URL(self.DATABASE_URL)   # Correct way
+
+        # Local fallback
         return URL.create(
             drivername="postgresql+asyncpg",
             username=self.DB_USER,
@@ -84,11 +83,7 @@ class Settings(BaseSettings):
 
     @property
     def database_url_sync(self) -> str:
-        return (
-            f"postgresql+psycopg2://"
-            f"{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        )
+        return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
 settings = Settings()
