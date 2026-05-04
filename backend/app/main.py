@@ -4,12 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes import users, posts
 from app.cache.redis_cache import init_redis
 
-app = FastAPI(title="AsyncBlog API")
+app = FastAPI(
+    title="AsyncBlog API",
+    version="1.0.0",
+    redirect_slashes=False
+)
 
-# --- PERMISSIVE CORS FOR PRODUCTION ---
+# --- PERMISSIVE CORS (temporary) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],           # Allow all origins
+    allow_origins=["*"],           # Allow all origins for now
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
