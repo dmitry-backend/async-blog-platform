@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     CACHE_KEY_PREFIX: str = "app"
 
     # --- DATABASE ---
-    DATABASE_URL: str | None = None
+    DATABASE_URL: str | None = None   # ← Supabase Transaction Pooler URL here
 
     # Local fallback
     DB_USER: str | None = None
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     DB_NAME_TEST: str = "async_blog_test"
 
     # --- SECURITY ---
-    JWT_SECRET_KEY: str                    # Required (must be in .env or Render)
+    JWT_SECRET_KEY: str                    # Required
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
@@ -60,16 +60,21 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> URL:
         """
-        Returns a SQLAlchemy URL object.
-        - On Render: uses DATABASE_URL env var
-        - Locally: builds from DB_ variables
+        Returns a SQLAlchemy URL object optimized for Supabase + Render.
+        - On Render: uses Supabase Transaction Pooler (port 6543)
+        - Locally: builds from individual DB_ variables
         """
         if self.DATABASE_URL:
             url = make_url(self.DATABASE_URL)
 
-            # Force async driver for asyncpg
+            # Force asyncpg driver
             if url.drivername in ("postgresql", "postgres"):
                 url = url.set(drivername="postgresql+asyncpg")
+
+            # Supabase requires SSL — safer way (compatible with all versions)
+            query_params = dict(url.query)
+            query_params["sslmode"] = "require"
+            url = url.set(query=query_params)
 
             return url
 
@@ -110,7 +115,5 @@ class Settings(BaseSettings):
         )
 
 
-# Instantiate with type ignore to silence Pylance false positive
-# (Pydantic loads required fields from .env / environment variables at runtime,
-# but Pylance doesn't understand this)
+# Instantiate with type ignore to silence Pylance
 settings = Settings()  # type: ignore[call-arg]
