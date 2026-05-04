@@ -11,10 +11,10 @@ app = FastAPI(
     redirect_slashes=False
 )
 
-# --- CORS Middleware ---
+# --- TEMPORARY PERMISSIVE CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=["*"],   # Allow all for now
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,5 +34,3 @@ async def health_check():
 # --- Routers ---
 app.include_router(users.router)
 app.include_router(posts.router)
-
-print("✅ CORS middleware applied")
