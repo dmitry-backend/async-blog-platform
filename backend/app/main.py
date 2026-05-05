@@ -6,12 +6,9 @@ from app.routes import users, posts
 from app.cache.redis_cache import init_redis
 from app.config import settings
 
-app = FastAPI(
-    title="Async Blog Platform",
-    version="1.0.0"
-)
+app = FastAPI(title="Async Blog Platform", version="1.0.0")
 
-# CORS - Must be added BEFORE including routers
+# CORS - Must be BEFORE routers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
@@ -24,19 +21,19 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     await init_redis()
-    print("🚀 Async Blog Platform started successfully")
+    print("🚀 Started successfully")
+    print("Allowed origins:", settings.ALLOWED_ORIGINS)   # Debug line
 
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
 
-# Important: Include routers AFTER CORS middleware
 app.include_router(users.router)
 app.include_router(posts.router)
 
 # For Render
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port)
     
