@@ -1,3 +1,14 @@
+"""
+Redis Cache Module (Lite Version)
+
+This version works without Redis (safe fallback for Render).
+The full version with all functions is saved as: redis_cache_full.py
+
+When you add Redis service later:
+1. Replace this file with redis_cache_full.py
+2. Or merge the features you need.
+"""
+
 import json
 import redis.asyncio as redis
 from app.config import settings
