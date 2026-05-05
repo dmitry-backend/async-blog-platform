@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import users, posts
 from app.cache.redis_cache import init_redis
+from app.config import settings
 
 app = FastAPI(
     title="AsyncBlog API",
@@ -10,10 +11,10 @@ app = FastAPI(
     redirect_slashes=False
 )
 
-# --- PERMISSIVE CORS (temporary) ---
+# --- Secure CORS using settings ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],           # Allow all origins for now
+    allow_origins=settings.ALLOWED_ORIGINS,   # Only your frontend + localhost
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,7 +29,8 @@ async def startup_event():
 async def health_check():
     return {"status": "ok"}
 
+# Include routers
 app.include_router(users.router)
 app.include_router(posts.router)
 
-print("✅ CORS middleware with * applied")
+print(f"✅ CORS configured with {len(settings.ALLOWED_ORIGINS)} allowed origins")
