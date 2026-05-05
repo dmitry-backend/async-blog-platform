@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 from app.routes import users, posts
 from app.cache.redis_cache import init_redis
@@ -7,14 +8,13 @@ from app.config import settings
 
 app = FastAPI(
     title="AsyncBlog API",
-    version="1.0.0",
-    redirect_slashes=False
+    version="1.0.0"
 )
 
-# --- Secure CORS using settings ---
+# Secure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,   # Only your frontend + localhost
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,14 +23,19 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     await init_redis()
-    print("🚀 AsyncBlog API started")
+    print(f"🚀 AsyncBlog API started on port {os.getenv('PORT', 'unknown')}")
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "port": os.getenv("PORT")}
 
-# Include routers
 app.include_router(users.router)
 app.include_router(posts.router)
 
-print(f"✅ CORS configured with {len(settings.ALLOWED_ORIGINS)} allowed origins")
+
+# This is important for Render
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+    
