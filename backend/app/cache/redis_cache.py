@@ -1,12 +1,15 @@
 import json
 import redis.asyncio as redis
 from app.config import settings
+from typing import Any
 
 redis_client: redis.Redis | None = None
 
+
 async def init_redis() -> redis.Redis | None:
-    """Initialize Redis with fallback if not available"""
+    """Initialize Redis with safe fallback"""
     global redis_client
+    
     if redis_client is not None:
         return redis_client
 
@@ -16,24 +19,33 @@ async def init_redis() -> redis.Redis | None:
             port=settings.REDIS_PORT,
             db=settings.REDIS_DB,
             decode_responses=True,
-            socket_connect_timeout=2,   # Don't hang if Redis is missing
+            socket_connect_timeout=2,
             socket_timeout=2,
         )
-        await redis_client.ping()       # Test connection
+        # Test connection
+        await redis_client.ping()          # ← This must be awaited
         print("✅ Redis connected successfully")
         return redis_client
     except Exception as e:
-        print(f"⚠️ Redis not available: {e}. Running without cache.")
+        print(f"⚠️ Redis unavailable: {e}. Running without cache.")
         redis_client = None
         return None
 
 
-async def get_cache(key: str):
-    """Get from cache with safe fallback"""
+# Cache Key Factories
+def create_post_id_key(post_id: int) -> str:
+    return f"posts:id:{post_id}"
+
+
+def create_paginated_posts_cache_key(page: int, size: int) -> str:
+    return f"posts:page={page}:size={size}"
+
+
+# Cache Operations
+async def get_cache(key: str) -> Any | None:
     r = await init_redis()
     if r is None:
         return None
-    
     try:
         data = await r.get(f"{settings.CACHE_KEY_PREFIX}:{key}")
         return json.loads(data) if data else None
@@ -41,12 +53,10 @@ async def get_cache(key: str):
         return None
 
 
-async def set_cache(key: str, value, ttl: int = 60):
-    """Set cache with safe fallback"""
+async def set_cache(key: str, value: Any, ttl: int = 60) -> None:
     r = await init_redis()
     if r is None:
         return
-    
     try:
         redis_key = f"{settings.CACHE_KEY_PREFIX}:{key}"
         await r.set(redis_key, json.dumps(value), ex=ttl)
@@ -54,5 +64,6 @@ async def set_cache(key: str, value, ttl: int = 60):
         pass  # Silently fail if Redis is down
 
 
-async def clear_paginated_posts_cache():
-    pass  # Disabled for now
+async def clear_paginated_posts_cache() -> None:
+    """Disabled for now"""
+    pass
